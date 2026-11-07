@@ -368,7 +368,7 @@ int offmode_charger_display_init(void)
 	lpm_red    = lpm_rgb(0xff, 0x3b, 0x30);
 	lpm_gray   = lpm_rgb(0x6e, 0x6e, 0x6e);
 
-	pclog("framebuffer %ux%u %ubpp, stride %u",
+	pcdrv("framebuffer %ux%u %ubpp, stride %u",
 	      lpm_w, lpm_h, lpm_bpp, lpm_stride);
 
 	return 0;

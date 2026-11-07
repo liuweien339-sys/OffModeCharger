@@ -34,18 +34,22 @@ void offmode_charger_display_shutdown(void);
 const u8 *offmode_charger_font_glyph(unsigned char c);
 
 /* offmode_charger_log.c */
-void offmode_charger_log(const char *fmt, ...);
-void offmode_charger_warn(const char *fmt, ...);
+void offmode_charger_log(const char *fmt, ...);		/* charger.log */
+void offmode_charger_drv(const char *fmt, ...);		/* driver.log */
+void offmode_charger_warn(const char *fmt, ...);	/* driver.log, pr_warn */
 void offmode_charger_log_start(void);
 void offmode_charger_log_flush(void);
 
-/* normal events: always go to the kernel log and to /data */
+/* charging events: kernel log + /data/adb/offmode_charger/charger.log */
 #define pclog(fmt, ...)		offmode_charger_log(fmt, ##__VA_ARGS__)
+
+/* driver plumbing: kernel log + /data/adb/offmode_charger/driver.log */
+#define pcdrv(fmt, ...)		offmode_charger_drv(fmt, ##__VA_ARGS__)
 #define pcwarn(fmt, ...)	offmode_charger_warn(fmt, ##__VA_ARGS__)
 
 /* verbose per-poll / per-redraw lines, only with CONFIG_OFFMODE_CHARGER_DEBUG */
 #ifdef CONFIG_OFFMODE_CHARGER_DEBUG
-#define pcdbg(fmt, ...)		offmode_charger_log(fmt, ##__VA_ARGS__)
+#define pcdbg(fmt, ...)		offmode_charger_drv(fmt, ##__VA_ARGS__)
 #else
 #define pcdbg(fmt, ...)		do { } while (0)
 #endif

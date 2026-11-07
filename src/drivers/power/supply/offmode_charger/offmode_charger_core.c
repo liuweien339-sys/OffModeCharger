@@ -108,11 +108,11 @@ static bool lpm_cmdline_is_charger(void)
 bool offmode_charger_boot_mode(void)
 {
 	if (lpm_cmdline_is_charger()) {
-		pclog("androidboot.mode=charger found in cmdline");
+		pcdrv("androidboot.mode=charger found in cmdline");
 		return true;
 	}
 
-	pclog("not a charger boot (no androidboot.mode=charger)");
+	pcdrv("not a charger boot (no androidboot.mode=charger)");
 
 	return false;
 }
@@ -142,7 +142,7 @@ static void lpm_rewrite_cmdline(void)
 		return;
 
 	memcpy(p, to, strlen(to));
-	pclog("cmdline: charger mode cleared, continuing with a normal boot");
+	pcdrv("cmdline: charger mode cleared, continuing with a normal boot");
 }
 
 /* ------------------------------------------------------------------ */
@@ -277,7 +277,7 @@ static int lpm_wait_supplies(struct lpm_ctx *ctx)
 			ctx->usb = lpm_get_charger_psy();
 
 		if (ctx->batt) {
-			pclog("supplies ready: battery found");
+			pcdrv("supplies ready: battery found");
 			return 0;
 		}
 
@@ -364,7 +364,7 @@ static void lpm_read_state(struct lpm_ctx *ctx, struct offmode_charger_state *st
 
 static void lpm_boot_work_fn(struct work_struct *work)
 {
-	pclog("power key held for %d ms, booting normally", LPM_BOOT_HOLD_MS);
+	pcdrv("power key held for %d ms, booting normally", LPM_BOOT_HOLD_MS);
 	WRITE_ONCE(lpm_boot_requested, true);
 	wake_up(&lpm_wait);
 }
@@ -678,7 +678,7 @@ static void lpm_ctl_restore(void)
 
 static void __noreturn lpm_power_off(void)
 {
-	pclog("powering off");
+	pcdrv("powering off");
 	kernel_power_off();
 
 	pcwarn("kernel_power_off() returned, no pm_power_off handler?");
@@ -702,7 +702,7 @@ void offmode_charger_run(void)
 
 	lpm_running = true;
 	offmode_charger_log_start();
-	pclog("entering kernel off-mode charger UI");
+	pcdrv("entering kernel off-mode charger UI");
 
 	INIT_DELAYED_WORK(&lpm_boot_work, lpm_boot_work_fn);
 
@@ -731,6 +731,8 @@ void offmode_charger_run(void)
 		lpm_ctl_apply(&st);
 
 		if (st.online) {
+			if (!seen_online)
+				pclog("charger online, start at %d%%", st.capacity);
 			seen_online = true;
 			off_ticks = 0;
 		} else if (seen_online) {
@@ -778,6 +780,6 @@ out:
 		power_supply_put(ctx.usb);
 
 	lpm_running = false;
-	pclog("leaving off-mode charger UI");
+	pcdrv("leaving off-mode charger UI");
 	offmode_charger_log_flush();
 }
