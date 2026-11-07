@@ -524,7 +524,7 @@ static void lpm_stats_sample(struct offmode_charger_state *st)
 
 	st->charge_ms = lpm_stat.ms;
 	st->avg_power_uw = lpm_stat.ms ?
-		(u32)div_u64(lpm_stat.energy_nj, lpm_stat.ms) : 0;
+		(u32)div64_u64(lpm_stat.energy_nj, lpm_stat.ms) : 0;
 
 	if (lpm_stat.active && lpm_stat.ms - lpm_stat.last_report_ms >= 600000) {
 		lpm_stat.last_report_ms = lpm_stat.ms;
@@ -532,8 +532,8 @@ static void lpm_stats_sample(struct offmode_charger_state *st)
 		      div_u64(lpm_stat.ms, 60000),
 		      st->avg_power_uw / 1000000,
 		      (st->avg_power_uw / 100000) % 10,
-		      div_u64(lpm_stat.energy_nj, 3600000000000ULL),
-		      div_u64(lpm_stat.energy_nj, 360000000000ULL) % 10);
+		      div64_u64(lpm_stat.energy_nj, 3600000000000ULL),
+		      div64_u64(lpm_stat.energy_nj, 360000000000ULL) % 10);
 	}
 }
 
@@ -549,8 +549,8 @@ static void lpm_stats_report(const char *why,
 	      why,
 	      div_u64(lpm_stat.ms, 60000),
 	      avg / 1000000, (avg / 100000) % 10,
-	      div_u64(lpm_stat.energy_nj, 3600000000000ULL),
-	      div_u64(lpm_stat.energy_nj, 360000000000ULL) % 10,
+	      div64_u64(lpm_stat.energy_nj, 3600000000000ULL),
+	      div64_u64(lpm_stat.energy_nj, 360000000000ULL) % 10,
 	      lpm_stat.start_cap, st->capacity);
 }
 
