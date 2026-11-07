@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# Kernel level off-mode (charger) UI
+#
+
+config OFFMODE_CHARGER
+	bool "Kernel level off-mode charger UI"
+	depends on POWER_SUPPLY
+	depends on FB
+	help
+	  Run a minimal charging screen directly in the kernel when the
+	  bootloader boots with androidboot.mode=charger.
+
+	  Instead of starting init and letting the user space charger
+	  service draw the screen, the kernel keeps the display alive,
+	  polls the battery and charger power supplies, powers the
+	  device off when the cable is removed and continues to boot
+	  when the power key is held down.
+
+	  Normal events are written to the kernel log and appended to
+	  /data/adb/offmode_charger/charger.log (the file is
+	  written once /data has been mounted by init).
+
+	  Say Y to replace the user space charger/charged service on
+	  devices whose bootloader enters charger mode through the
+	  kernel command line.  Say N otherwise.
+
+	  This needs a working framebuffer (CONFIG_FB plus
+	  CONFIG_DRM_FBDEV_EMULATION for the msm DRM driver, or any
+	  other fbdev provider).
+
+config OFFMODE_CHARGER_DEBUG
+	bool "Verbose charger UI logging"
+	depends on OFFMODE_CHARGER
+	default n
+	help
+	  Add verbose lines to the charger UI log: every power supply
+	  poll, every redraw and every input event.
+
+	  Without this option only the normal events are logged, but
+	  they are still written to the kernel log and to
+	  /data/adb/offmode_charger/charger.log.
+
+	  Only useful while debugging; the verbose lines are relatively
+	  chatty (one line per second while the charger UI is up).
+	  Say N for production builds.
