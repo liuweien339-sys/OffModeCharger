@@ -2,10 +2,15 @@
 #
 # Kernel level off-mode (charger) UI
 #
+# Sourced from drivers/power/Kconfig so both options sit together at the
+# "Device Drivers" level and are easy to find.
+#
+
+menu "Off-mode charger"
+	depends on POWER_SUPPLY
 
 config OFFMODE_CHARGER
 	bool "Kernel level off-mode charger UI"
-	depends on POWER_SUPPLY
 	depends on FB
 	help
 	  Run a minimal charging screen directly in the kernel when the
@@ -37,10 +42,13 @@ config OFFMODE_CHARGER_DEBUG
 	  Add verbose lines to the charger UI log: every power supply
 	  poll, every redraw and every input event.
 
-	  Without this option only the normal events are logged, but
+	  This option only shows up after OFFMODE_CHARGER has been
+	  enabled; without it only the normal events are logged, but
 	  they are still written to the kernel log and to
 	  /data/adb/offmode_charger/driver.log and charger.log.
 
 	  Only useful while debugging; the verbose lines are relatively
 	  chatty (one line per second while the charger UI is up).
 	  Say N for production builds.
+
+endmenu
