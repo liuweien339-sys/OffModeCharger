@@ -9,8 +9,13 @@
  * With CONFIG_OFFMODE_CHARGER=y the kernel runs the charging UI itself, before
  * (and instead of) exec'ing /init.  init/main.c only has to do:
  *
- *	if (offmode_charger_boot_mode())
- *		offmode_charger_run();
+ *	if (offmode_charger_init())
+ *		offmode_charger_start();
+ *
+ * offmode_charger_init() runs on every boot: it brings up the logging and
+ * decides whether this is a charger boot.  offmode_charger_start() then takes
+ * over the init thread and only returns when the user asked for a normal boot;
+ * it must always be preceded by offmode_charger_init().
  */
 #ifndef _LINUX_OFFMODE_CHARGER_H
 #define _LINUX_OFFMODE_CHARGER_H
@@ -19,17 +24,17 @@
 
 #ifdef CONFIG_OFFMODE_CHARGER
 
-bool offmode_charger_boot_mode(void);
-void offmode_charger_run(void);
+bool offmode_charger_init(void);
+void offmode_charger_start(void);
 
 #else /* !CONFIG_OFFMODE_CHARGER */
 
-static inline bool offmode_charger_boot_mode(void)
+static inline bool offmode_charger_init(void)
 {
 	return false;
 }
 
-static inline void offmode_charger_run(void)
+static inline void offmode_charger_start(void)
 {
 }
 

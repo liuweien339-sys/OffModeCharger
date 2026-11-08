@@ -83,6 +83,7 @@ struct lpm_ctx {
 
 static DECLARE_WAIT_QUEUE_HEAD(lpm_wait);
 static struct delayed_work lpm_boot_work;
+static void lpm_boot_work_fn(struct work_struct *work);
 static bool lpm_boot_requested;
 static bool lpm_running;
 
@@ -105,16 +106,41 @@ static bool lpm_cmdline_is_charger(void)
 	return strstr(saved_command_line, "androidboot.charger=1") != NULL;
 }
 
-bool offmode_charger_boot_mode(void)
+static void lpm_dump_cmdline(void)
 {
-	if (lpm_cmdline_is_charger()) {
-		pcdrv("androidboot.mode=charger found in cmdline");
-		return true;
+	const char *p = saved_command_line;
+	char buf[161];
+	int i;
+
+	if (!p)
+		return;
+
+	for (i = 0; *p; i++, p += 160) {
+		size_t n = strnlen(p, 160);
+
+		memcpy(buf, p, n);
+		buf[n] = '\0';
+		pcdrv("cmdline[%d]: %s", i, buf);
 	}
+}
 
-	pcdrv("not a charger boot (no androidboot.mode=charger)");
+bool offmode_charger_init(void)
+{
+	bool charger;
 
-	return false;
+	/*
+	 * Start the log writer and dump the command line on every boot, not
+	 * only in charger mode, so the decision is always traceable in
+	 * /data/adb/offmode_charger/driver.log.
+	 */
+	offmode_charger_log_start();
+	lpm_dump_cmdline();
+	INIT_DELAYED_WORK(&lpm_boot_work, lpm_boot_work_fn);
+
+	charger = lpm_cmdline_is_charger();
+	pcdrv("boot mode: %s", charger ? "charger" : "normal");
+
+	return charger;
 }
 
 /*
@@ -687,7 +713,7 @@ static void __noreturn lpm_power_off(void)
 		msleep(1000);
 }
 
-void offmode_charger_run(void)
+void offmode_charger_start(void)
 {
 	struct lpm_ctx ctx = { NULL, NULL };
 	struct offmode_charger_state st = { 0 };
@@ -701,10 +727,7 @@ void offmode_charger_run(void)
 		return;
 
 	lpm_running = true;
-	offmode_charger_log_start();
 	pcdrv("entering kernel off-mode charger UI");
-
-	INIT_DELAYED_WORK(&lpm_boot_work, lpm_boot_work_fn);
 
 	if (lpm_wait_supplies(&ctx) < 0) {
 		pcwarn("no battery power supply, booting normally");

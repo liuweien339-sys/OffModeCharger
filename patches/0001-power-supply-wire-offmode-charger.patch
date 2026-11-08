@@ -22,7 +22,7 @@ index 30acf6b..4e7243e 100644
  
  obj-$(CONFIG_PDA_POWER)		+= pda_power.o
 diff --git a/init/main.c b/init/main.c
-index 4232747..9674b39 100644
+index 4232747..db12f71 100644
 --- a/init/main.c
 +++ b/init/main.c
 @@ -27,6 +27,7 @@
@@ -42,8 +42,8 @@ index 4232747..9674b39 100644
 +	 * the charging UI right here instead of starting init.  It returns
 +	 * only when the user asked for a normal boot.
 +	 */
-+	if (offmode_charger_boot_mode())
-+		offmode_charger_run();
++	if (offmode_charger_init())
++		offmode_charger_start();
 +
  	if (ramdisk_execute_command) {
  		ret = run_init_process(ramdisk_execute_command);

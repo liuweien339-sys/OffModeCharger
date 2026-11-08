@@ -373,7 +373,6 @@ int offmode_charger_display_init(void)
 
 	return 0;
 }
-
 void offmode_charger_display_update(const struct offmode_charger_state *st, bool anim)
 {
 	struct lpm_layout lay;
