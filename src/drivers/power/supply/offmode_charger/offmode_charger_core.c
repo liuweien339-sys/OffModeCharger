@@ -411,7 +411,7 @@ static void lpm_input_event(struct input_handle *handle, unsigned int type,
 		schedule_delayed_work(&lpm_boot_work,
 				      msecs_to_jiffies(LPM_BOOT_HOLD_MS));
 	else if (value == 0)
-		cancel_delayed_work(&lpm_boot_work);
+		cancel_delayed_work_sync(&lpm_boot_work);
 }
 
 static int lpm_input_connect(struct input_handler *handler,
@@ -477,6 +477,7 @@ static struct input_handler lpm_input_handler = {
 	.event		= lpm_input_event,
 	.connect	= lpm_input_connect,
 	.disconnect	= lpm_input_disconnect,
+	.owner		= THIS_MODULE,
 	.name		= "offmode_charger",
 	.id_table	= lpm_input_ids,
 };
@@ -535,8 +536,9 @@ static void lpm_stats_sample(struct offmode_charger_state *st)
 		lpm_stat.active = st->status == POWER_SUPPLY_STATUS_CHARGING;
 	}
 
-	dt = ktime_ms_delta(ktime_get(), lpm_stat.last);
-	lpm_stat.last = ktime_get();
+	ktime_t __now = ktime_get();
+	dt = (s64)ktime_to_ms(ktime_sub(__now, lpm_stat.last));
+	lpm_stat.last = __now;
 	if (dt <= 0 || dt > 5000)
 		dt = 0;
 
