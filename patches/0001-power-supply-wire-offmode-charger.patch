@@ -1,5 +1,4 @@
 diff --git a/drivers/power/Kconfig b/drivers/power/Kconfig
-index 67b9ef4..e544340 100644
 --- a/drivers/power/Kconfig
 +++ b/drivers/power/Kconfig
 @@ -2,2 +2,3 @@
@@ -7,7 +6,6 @@ index 67b9ef4..e544340 100644
 +source "drivers/power/supply/offmode_charger/Kconfig"
  source "drivers/power/supply/Kconfig"
 diff --git a/drivers/power/supply/Makefile b/drivers/power/supply/Makefile
-index 30acf6b..4e7243e 100644
 --- a/drivers/power/supply/Makefile
 +++ b/drivers/power/supply/Makefile
 @@ -7,2 +7,3 @@ 
@@ -15,7 +13,6 @@ obj-$(CONFIG_POWER_SUPPLY)	+= power_supply.o
 +obj-$(CONFIG_OFFMODE_CHARGER)	+= offmode_charger/
 obj-$(CONFIG_POWER_SUPPLY_HWMON) += power_supply_hwmon.o
 diff --git a/init/main.c b/init/main.c
-index 4232747..db12f71 100644
 --- a/init/main.c
 +++ b/init/main.c
 @@ -30,2 +30,3 @@
